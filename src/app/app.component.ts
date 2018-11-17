@@ -25,11 +25,12 @@ export class AppComponent {
   raycaster;
   mouse;
   sprite;
-modelLoaded;
+  modelLoaded;
   constructor() {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x383838);
     this.light = new THREE.HemisphereLight(0xbbbbff, 0x444422);
     this.light.position.set(0, 1, 0);
     this.scene.add(this.light);
@@ -46,7 +47,19 @@ modelLoaded;
     const loader = new GLTFLoader();
     loader.load('../assets/models/A320/scene.gltf', (gltf) => {
       this.scene.add(gltf.scene);
-      this.modelLoaded=gltf.scene;
+      this.modelLoaded = gltf.scene;
+      this.modelLoaded.traverse((child) => {
+        if (child.isMesh) {
+          const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+          const wireframeMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.2
+          });
+          const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+          child.add(wireframe);
+        }
+      });
     }, undefined, function (e) {
       console.error(e);
     });
@@ -92,7 +105,7 @@ modelLoaded;
             shading: THREE.FlatShading
           })
         );
-        const vector = new THREE.Vector3( this.mouse.x, this.mouse.y, -1 ).unproject( this.camera );
+        const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
         mesh.position.set(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
         this.scene.add(mesh);
         this.renderer.render(this.scene, this.camera);
