@@ -15,6 +15,7 @@ import GLTFLoader from 'three-gltf-loader';
 })
 export class AppComponent {
   @ViewChild('rendererContainer') rendererContainer: ElementRef;
+  @ViewChild('wireframeButton') wireframeButton: ElementRef;
 
   renderer = new THREE.WebGLRenderer();
   scene;
@@ -26,6 +27,7 @@ export class AppComponent {
   mouse;
   sprite;
   modelLoaded;
+  markMode = false;
   constructor() {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -62,17 +64,46 @@ export class AppComponent {
     window.addEventListener('resize', () => {
       this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
     });
   }
   animate() {
     window.requestAnimationFrame(() => this.animate());
     this.renderer.render(this.scene, this.camera);
-    //console.log('check');
+  }
+  onMark() {
+    this.markMode = true;
+  }
+  onWireframe() {
+    this.modelLoaded.traverse((child) => {
+      if (child.isMesh) {
+        child.material.wireframe = true;
+        child.material.transparent = true;
+        child.material.opacity = 0.5;
+      }
+    });
+  }
+  onMaterial() {
+    this.modelLoaded.traverse((child) => {
+      if (child.isMesh) {
+        child.material.wireframe = false;
+        child.material.transparent = false;
+        child.material.opacity = 1;
+      }
+    });
+  }
+  onTransperant() {
+    this.modelLoaded.traverse((child) => {
+      if (child.isMesh) {
+        child.material.wireframe = false;
+        child.material.transparent = true;
+        child.material.opacity = 0.3;
+      }
+    });
   }
   ngOnInit() {
     let count = 0;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
     this.camera = new THREE.PerspectiveCamera(60, this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight, 1, 80000);
     this.camera.position.set(-1000, 9000, 42000);
@@ -81,46 +112,39 @@ export class AppComponent {
     this.controls.update();
     this.animate();
     window.addEventListener('click', (event) => {
-      debugger;
-      this.mouse.x = (event.clientX / this.rendererContainer.nativeElement.firstChild.clientWidth) * 2 - 1;
-      this.mouse.y = -(event.clientY / this.rendererContainer.nativeElement.firstChild.clientHeight) * 2 + 1;
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-      const vec = new THREE.Vector3();
-      vec.unproject(this.camera);
-      // calculate objects intersecting the picking ray
-      const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-      console.log('Intersects:::' + intersects.length);
-
-      if (intersects.length !== 0) {
-        debugger;
-        const numberTexture = new THREE.CanvasTexture(
-          document.querySelector('#number')
-        );
-        const cubeGeometry = new THREE.BoxGeometry(200, 200, 200);
-
-        let mesh = new THREE.Mesh(
-          cubeGeometry,
-          new THREE.MeshPhongMaterial({
-            color: 0xcc0000,
-            emissive: 0x000000,
-            side: THREE.DoubleSide,
-            shading: THREE.FlatShading
-          })
-        );
-        const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
-        mesh.position.set(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-        this.scene.add(mesh);
-        this.renderer.render(this.scene, this.camera);
-      }
+      if (this.markMode) {
+        this.mouse.x = (event.clientX / this.rendererContainer.nativeElement.firstChild.clientWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / this.rendererContainer.nativeElement.firstChild.clientHeight) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const vec = new THREE.Vector3();
+        vec.unproject(this.camera);
+        // calculate objects intersecting the picking ray
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        if (intersects.length !== 0) {
+          const cubeGeometry = new THREE.BoxGeometry(250, 250, 250);
+          let mesh = new THREE.Mesh(
+            cubeGeometry,
+            new THREE.MeshPhongMaterial({
+              color: 0xcc0000,
+              emissive: 0x000000,
+              side: THREE.DoubleSide,
+              shading: THREE.FlatShading
+            })
+          );
+          const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
+          mesh.position.set(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+          this.scene.add(mesh);
+          this.markMode=false;
+          this.renderer.render(this.scene, this.camera);
+        }
+      };
     });
-    // this.rendererContainer.nativeElement.addEventListener('click', () => {
-    //   debugger;
-    // });
+
   }
 
   onWindowResize() {
     this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
   }
 }
