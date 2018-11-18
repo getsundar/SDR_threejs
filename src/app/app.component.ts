@@ -96,13 +96,13 @@ export class AppComponent {
         const numberTexture = new THREE.CanvasTexture(
           document.querySelector('#number')
         );
-        const cubeGeometry = new THREE.BoxGeometry(500, 500, 500);
+        const cubeGeometry = new THREE.BoxGeometry(200, 200, 200);
 
         let mesh = new THREE.Mesh(
           cubeGeometry,
           new THREE.MeshPhongMaterial({
-            color: 0x156289,
-            emissive: 0x072534,
+            color: 0xcc0000,
+            emissive: 0x000000,
             side: THREE.DoubleSide,
             shading: THREE.FlatShading
           })
