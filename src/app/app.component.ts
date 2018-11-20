@@ -41,7 +41,6 @@ export class AppComponent {
     this.scene.add(this.light);
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    //this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.gammaOutput = true;
 
     const loader = new GLTFLoader();
@@ -110,12 +109,22 @@ export class AppComponent {
     this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
     this.camera = new THREE.PerspectiveCamera(60, this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight, 1, 80000);
-    this.camera.position.set(-1000, 9000, 42000);
+    this.camera.position.set(-1000, 8000, 42000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0, 20000);
     this.controls.update();
     this.animate();
     window.addEventListener('click', (event) => {
+      if (this.modelLoaded && this.annotationAddedArray.length !== 0) {
+        this.annotationAddedArray.forEach(annotation => {
+          // const meshDistance = this.camera.position.distanceTo(this.modelLoaded.position)-20000;
+          // const spriteDistance = this.camera.position.distanceTo(annotation.position);
+          // console.log("Mesh::" + meshDistance + ':::Sprite::::' + spriteDistance);
+          // const spriteBehindObject = spriteDistance > meshDistance;
+          // annotation.material.opacity = spriteBehindObject ? 0 : 1;
+        });
+      }
+
       if (this.markMode) {
         this.mouse.x = (event.clientX / this.rendererContainer.nativeElement.firstChild.clientWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / this.rendererContainer.nativeElement.firstChild.clientHeight) * 2 + 1;
@@ -136,7 +145,7 @@ export class AppComponent {
           //   })
           // );
           // const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
-          let canvas: any = document.getElementById("number");
+          let canvas: any = document.getElementById('number');
           const ctx = canvas.getContext('2d');
           const x = 32;
           const y = 32;
@@ -161,7 +170,7 @@ export class AppComponent {
           ctx.textBaseline = 'middle';
           ctx.fillText(this.currentAnnotationCount, x, y);
           const numberTexture = new THREE.CanvasTexture(
-            document.querySelector("#number")
+            document.querySelector('#number')
           );
 
           const spriteMaterial = new THREE.SpriteMaterial({
@@ -196,14 +205,10 @@ export class AppComponent {
   updateAnnotationOpacity() {
     if (this.modelLoaded && this.annotationAddedArray.length !== 0) {
       this.annotationAddedArray.forEach(annotation => {
-        // const meshDistance = this.camera.position.distanceTo(this.modelLoaded.position);
-        // const spriteDistance = this.camera.position.distanceTo(annotation.position);
-        // const spriteBehindObject = spriteDistance > meshDistance;
-        // annotation.material.opacity = spriteBehindObject ? 0 : 1;
-        var scaleVector = new THREE.Vector3();
-        var scaleFactor = 15;
-        var scale = scaleVector.subVectors(annotation.position, this.camera.position).length() / (scaleFactor / this.camera.zoom);
-        annotation.scale.set(scale, scale, 1);
+        const meshDistance = this.camera.position.distanceTo(this.modelLoaded.position);
+        const spriteDistance = this.camera.position.distanceTo(annotation.position) + 20000;
+        const spriteBehindObject = spriteDistance > meshDistance;
+        annotation.material.opacity = spriteBehindObject ? 0 : 1;
       });
     }
 
