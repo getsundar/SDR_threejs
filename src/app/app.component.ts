@@ -28,6 +28,9 @@ export class AppComponent {
   sprite;
   modelLoaded;
   markMode = false;
+  annotationAdded;
+  annotationAddedArray = [];
+  currentAnnotationCount = 1;
   constructor() {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -68,6 +71,7 @@ export class AppComponent {
     });
   }
   animate() {
+    //this.updateAnnotationOpacity();
     window.requestAnimationFrame(() => this.animate());
     this.renderer.render(this.scene, this.camera);
   }
@@ -121,20 +125,61 @@ export class AppComponent {
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObjects(this.scene.children, true);
         if (intersects.length !== 0) {
-          const cubeGeometry = new THREE.BoxGeometry(250, 250, 250);
-          let mesh = new THREE.Mesh(
-            cubeGeometry,
-            new THREE.MeshPhongMaterial({
-              color: 0xcc0000,
-              emissive: 0x000000,
-              side: THREE.DoubleSide,
-              shading: THREE.FlatShading
-            })
+          // const cubeGeometry = new THREE.BoxGeometry(250, 250, 250);
+          // let mesh = new THREE.Mesh(
+          //   cubeGeometry,
+          //   new THREE.MeshPhongMaterial({
+          //     color: 0xcc0000,
+          //     emissive: 0x000000,
+          //     side: THREE.DoubleSide,
+          //     shading: THREE.FlatShading
+          //   })
+          // );
+          // const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
+          let canvas: any = document.getElementById("number");
+          const ctx = canvas.getContext('2d');
+          const x = 32;
+          const y = 32;
+          const radius = 30;
+          const startAngle = 0;
+          const endAngle = Math.PI * 2;
+
+          ctx.fillStyle = 'rgb(0, 0, 0)';
+          ctx.beginPath();
+          ctx.arc(x, y, radius, startAngle, endAngle);
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgb(255, 255, 255)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, startAngle, endAngle);
+          ctx.stroke();
+
+          ctx.fillStyle = 'rgb(255, 255, 255)';
+          ctx.font = '32px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(this.currentAnnotationCount, x, y);
+          const numberTexture = new THREE.CanvasTexture(
+            document.querySelector("#number")
           );
-          const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, -1).unproject(this.camera);
-          mesh.position.set(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-          this.scene.add(mesh);
-          this.markMode=false;
+
+          const spriteMaterial = new THREE.SpriteMaterial({
+            map: numberTexture,
+            depthTest: false,
+            depthWrite: false,
+            sizeAttenuation: false
+          });
+
+          let annotationAdded = new THREE.Sprite(spriteMaterial);
+          //sprite.position.set(250, 250, 250);
+          annotationAdded.scale.set(0.03, 0.03, 1);
+
+          annotationAdded.position.set(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+          this.scene.add(annotationAdded);
+          this.annotationAddedArray.push(annotationAdded);
+          this.currentAnnotationCount++;
+          this.markMode = false;
           this.renderer.render(this.scene, this.camera);
         }
       };
@@ -146,5 +191,21 @@ export class AppComponent {
     this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
+  }
+
+  updateAnnotationOpacity() {
+    if (this.modelLoaded && this.annotationAddedArray.length !== 0) {
+      this.annotationAddedArray.forEach(annotation => {
+        // const meshDistance = this.camera.position.distanceTo(this.modelLoaded.position);
+        // const spriteDistance = this.camera.position.distanceTo(annotation.position);
+        // const spriteBehindObject = spriteDistance > meshDistance;
+        // annotation.material.opacity = spriteBehindObject ? 0 : 1;
+        var scaleVector = new THREE.Vector3();
+        var scaleFactor = 15;
+        var scale = scaleVector.subVectors(annotation.position, this.camera.position).length() / (scaleFactor / this.camera.zoom);
+        annotation.scale.set(scale, scale, 1);
+      });
+    }
+
   }
 }
