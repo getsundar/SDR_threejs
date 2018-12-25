@@ -24,6 +24,7 @@ export class RendererComponentComponent implements OnInit {
   @Input() cameraPosition: any;
   @Input() controlsPosition: any;
   @Input() showAxishelper: boolean;
+  @Input() axisHelperSize: any;
   renderer = new THREE.WebGLRenderer();
   scene;
   camera;
@@ -80,7 +81,7 @@ export class RendererComponentComponent implements OnInit {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(this.rendererWidth, this.rendererHeight);
     });
-    const axesHelper = new THREE.AxesHelper(50);
+    const axesHelper = new THREE.AxesHelper(this.axisHelperSize);
     if (this.showAxishelper) {
       this.scene.add(axesHelper);
     }
