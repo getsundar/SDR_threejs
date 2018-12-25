@@ -23,6 +23,7 @@ export class RendererComponentComponent implements OnInit {
   @Input() rendererWidth: any;
   @Input() cameraPosition: any;
   @Input() controlsPosition: any;
+  @Input() showAxishelper: boolean;
   renderer = new THREE.WebGLRenderer();
   scene;
   camera;
@@ -74,14 +75,19 @@ export class RendererComponentComponent implements OnInit {
       console.error(e);
     });
     window.addEventListener('resize', () => {
-      this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
+      this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth /
+        this.rendererContainer.nativeElement.firstChild.clientHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(this.rendererWidth, this.rendererHeight);
     });
-    let count = 0;
+    const axesHelper = new THREE.AxesHelper(50);
+    if (this.showAxishelper) {
+      this.scene.add(axesHelper);
+    }
     this.renderer.setSize(this.rendererWidth, this.rendererHeight);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
-    this.camera = new THREE.PerspectiveCamera(60, this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight, 1, 80000);
+    this.camera = new THREE.PerspectiveCamera(60, this.rendererContainer.nativeElement.firstChild.clientWidth /
+      this.rendererContainer.nativeElement.firstChild.clientHeight, 1, 80000);
     this.camera.position.set(this.cameraPosition[0], this.cameraPosition[1], this.cameraPosition[2]);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(this.controlsPosition[0], this.controlsPosition[1], this.controlsPosition[2]);
@@ -168,7 +174,8 @@ export class RendererComponentComponent implements OnInit {
     });
   }
   onWindowResize() {
-    this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
+    this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth /
+      this.rendererContainer.nativeElement.firstChild.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
   }
