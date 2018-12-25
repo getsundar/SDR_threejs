@@ -19,7 +19,10 @@ export class RendererComponentComponent implements OnInit {
   @ViewChild('rendererContainer') rendererContainer: ElementRef;
   @ViewChild('wireframeButton') wireframeButton: ElementRef;
   @Input() modelPath: any;
-
+  @Input() rendererHeight: any;
+  @Input() rendererWidth: any;
+  @Input() cameraPosition: any;
+  @Input() controlsPosition: any;
   renderer = new THREE.WebGLRenderer();
   scene;
   camera;
@@ -54,7 +57,6 @@ export class RendererComponentComponent implements OnInit {
       this.modelLoaded = gltf.scene;
       let co = this.modelLoaded.getWorldPosition();
       let sc = this.modelLoaded.getWorldScale();
-      debugger;
       //this.modelLoaded.scale.set(200, 200, 200);
       // this.modelLoaded.traverse((child) => {
       //   if (child.isMesh) {
@@ -71,21 +73,18 @@ export class RendererComponentComponent implements OnInit {
     }, undefined, function (e) {
       console.error(e);
     });
-
     window.addEventListener('resize', () => {
       this.camera.aspect = this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
+      this.renderer.setSize(this.rendererWidth, this.rendererHeight);
     });
-
-    
     let count = 0;
-    this.renderer.setSize(window.innerWidth, window.innerHeight - 50);
+    this.renderer.setSize(this.rendererWidth, this.rendererHeight);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
     this.camera = new THREE.PerspectiveCamera(60, this.rendererContainer.nativeElement.firstChild.clientWidth / this.rendererContainer.nativeElement.firstChild.clientHeight, 1, 80000);
-    this.camera.position.set(0, 0, 60000);
+    this.camera.position.set(this.cameraPosition[0], this.cameraPosition[1], this.cameraPosition[2]);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    //this.controls.target.set(0, 0, 20000);
+    this.controls.target.set(this.controlsPosition[0], this.controlsPosition[1], this.controlsPosition[2]);
     this.controls.update();
     this.animate();
     window.addEventListener('click', (event) => {
