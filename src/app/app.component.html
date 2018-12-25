@@ -1,8 +1,1 @@
-<div #rendererContainer></div>
-<div style="display: flex;float: right;">
-  <button (click)="onMark()">Mark</button>
-  <button (click)="onMaterial()">Material</button>
-  <button (click)="onWireframe()">Wireframe</button>
-  <button (click)="onTransperant()">Transperant</button>
-</div>
-<canvas id="number" width="64" height="64"></canvas>
+<app-renderer-component [modelPath]="'../assets/models/seat_obj/scene.gltf'"></app-renderer-component>
