@@ -60,18 +60,18 @@ export class RendererComponentComponent implements OnInit {
       let co = this.modelLoaded.getWorldPosition();
       let sc = this.modelLoaded.getWorldScale();
       //this.modelLoaded.scale.set(200, 200, 200);
-      // this.modelLoaded.traverse((child) => {
-      //   if (child.isMesh) {
-      //     const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
-      //     const wireframeMaterial = new THREE.LineBasicMaterial({
-      //       color: 0x000000,
-      //       transparent: true,
-      //       opacity: 0.2
-      //     });
-      //     const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
-      //     child.add(wireframe);
-      //   }
-      // });
+      this.modelLoaded.traverse((child) => {
+        if (child.isMesh) {
+          const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+          const wireframeMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.2
+          });
+          const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+          child.add(wireframe);
+        }
+      });
     }, undefined, function (e) {
       console.error(e);
     });
